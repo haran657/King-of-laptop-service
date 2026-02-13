@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>King of Laptop Service - Master Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        input,
+        select,
+        textarea {
+            background: #334155 !important;
+            color: white !important;
+            border: 1px solid #475569 !important;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        th {
+            background: #1e293b;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 10px;
+            padding: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        #ad {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .spare-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+            align-items: center;
+        }
+
+        .spare-row input {
+            font-size: 11px !important;
+            padding: 4px !important;
+        }
+
+        @media print {
+
+            /* Hide everything on the page by default */
+            body * {
+                visibility: hidden;
+                height: 0;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Target the specific container we want to show */
+            .print-active,
+            .print-active * {
+                visibility: visible !important;
+                height: auto !important;
+            }
+
+            /* Position the active print area at the very top */
+            .print-active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+            }
+
+            #cx_name {
+                display: flex;
+                margin-top: 10px;
+                line-height: 1px;
+            }
+
+            #cx_ph {
+                line-height: 1px;
+            }
+
+            #i-addr {
+                display: block;
+                line-break: auto;
+            }
+
+        }
+
+        /*    @media print { */
+
+        /* Hide everything except the receipts */
+        /*    .sidebar,
+            .main-content,
+            .no-print,
+            button,
+            nav,
+            .page {
+                display: none !important;
+            } */
+
+        /* Force visibility for whichever receipt is currently being printed */
+        /*    #invoice,
+            #intake-receipt {
+                display: block !important;
+                width: 100% !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+            } */
+        /*   } */
+    </style>
+</head>
+
+<body>
+
+    <div class="flex gap-4 mb-6 items-center bg-slate-800 p-4 rounded-lg no-print">
+        <div>
+            <label class="text-[10px] text-slate-400 block uppercase">Select Database Period</label>
+            <input type="month" id="dbPeriod" class="!w-48" onchange="fetchData()">
+        </div>
+        <div class="text-sm text-slate-400 mt-4">
+            <i class="fas fa-info-circle"></i> Showing records for the selected month.
+        </div>
+    </div>
+    <div class="sidebar no-print p-6">
+        <div class="text-yellow-500 text-2xl font-black mb-10 flex items-center gap-2">
+            <i class="fas fa-crown"></i> KINGS SERVICE
+        </div>
+        <nav class="space-y-2">
+            <button onclick="showPage('dash')" class="w-full text-left p-3 hover:bg-slate-700 rounded-lg"><i
+                    class="fas fa-chart-pie w-8"></i> Dashboard</button>
+            <button onclick="showPage('form')" class="w-full text-left p-3 hover:bg-slate-700 rounded-lg"><i
+                    class="fas fa-plus-circle w-8"></i> New Intake</button>
+            <button onclick="showPage('db')" class="w-full text-left p-3 hover:bg-slate-700 rounded-lg"><i
+                    class="fas fa-list w-8"></i> Service Records</button>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div id="page-dash" class="page">
+            <h2 class="text-2xl font-bold mb-6">Business Overview
+                <button onclick="fetchData()" class="bg-slate-700 px-4 rounded hover:bg-slate-600 ml-20">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                <div class="card border-l-4 border-yellow-500">
+                    <p class="text-slate-400 text-xs">MONTHLY INTAKE</p>
+                    <h3 id="s-total" class="text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="card border-l-4 border-green-500">
+                    <p class="text-slate-400 text-xs">DELIVERED</p>
+                    <h3 id="s-del" class="text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="card border-l-4 border-blue-400">
+                    <p class="text-slate-400 text-xs">PENDING</p>
+                    <h3 id="s-pen" class="text-2xl font-bold mt-1">0</h3>
+                </div>
+                <div class="card border-l-4 border-indigo-500">
+                    <p class="text-slate-400 text-xs">MONTH REVENUE</p>
+                    <h3 id="s-rev" class="text-2xl font-bold mt-1">₹0</h3>
+                </div>
+                <div class="card border-l-4 border-purple-500">
+                    <p class="text-slate-400 text-xs">MONTH PROFIT</p>
+                    <h3 id="s-prof" class="text-2xl font-bold mt-1 text-green-400">₹0</h3>
+                </div>
+            </div>
+
+            <div class="mt-10" id="ad">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-400 uppercase tracking-widest">Yearly Performance</h3>
+                    <button onclick="fetchYearlySummary()"
+                        class="text-xs bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">
+                        <i class="fas fa-sync"></i> Refresh Annual Data
+                    </button>
+                </div>
+                <div class="card overflow-hidden !p-0">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-800">
+                                <th class="p-3">Month</th>
+                                <th class="p-3">Intake</th>
+                                <th class="p-3">Delivered</th>
+                                <th class="p-3">Revenue</th>
+                                <th class="p-3">Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="yearlyBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="page-form" class="page hidden">
+            <div class="card max-w-5xl mx-auto shadow-2xl">
+                <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+                    <h2 class="text-xl font-bold text-yellow-500 uppercase tracking-widest">Entry Registration</h2>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase">Current Intake No</span>
+                        <h1 id="dispNo" class="text-3xl font-mono font-black text-white">---</h1>
+                    </div>
+                </div>
+                <form id="intakeForm" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Intake Date</label><input
+                            type="datetime-local" name="Date" required></div>
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Customer Name</label><input
+                            type="text" name="Customer_Name" placeholder="Full Name" required></div>
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Phone Number</label><input
+                            type="text" name="Phone_number" placeholder="Mobile" required></div>
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Alternate Phone</label><input
+                            type="text" name="Alternate_number"></div>
+                    <div class="md:col-span-2"><label
+                            class="text-[11px] font-bold text-slate-400 uppercase">Address</label><input type="text"
+                            name="Address"></div>
+                    <div class="md:col-span-3 grid grid-cols-3 gap-4 bg-slate-800/30 p-4 rounded-lg">
+                        <div><label class="text-[11px] font-bold text-slate-400 uppercase">Device</label><input
+                                type="text" name="Device" placeholder="e.g. Laptop" required></div>
+                        <div><label class="text-[11px] font-bold text-slate-400 uppercase">Make</label><input
+                                type="text" name="Make" placeholder="e.g. Dell" required></div>
+                        <div><label class="text-[11px] font-bold text-slate-400 uppercase">Model</label><input
+                                type="text" name="Model" placeholder="e.g. Latitude" required></div>
+                    </div>
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Damages</label><textarea
+                            name="Damages" rows="2" placeholder="Scratches/Dents"></textarea></div>
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Issue</label><textarea
+                            name="Issue" rows="2" placeholder="Complaint" required></textarea></div>
+                    <div><label class="text-[11px] font-bold text-slate-400 uppercase">Remark</label><textarea
+                            name="Remarks" rows="2" placeholder="Internal notes"></textarea></div>
+                    <div class="md:col-span-3 flex gap-3 mt-4">
+                        <button type="submit" id="subBtn"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-10 rounded flex-1 transition">REGISTER
+                            & SAVE</button>
+                        <button type="reset" onclick="resetForm()" class="bg-slate-700 px-8 rounded">CLEAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="page-db" class="page hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Service Records Database</h2>
+                <div class="flex gap-2">
+                    <!--<input type="text" id="search" placeholder="Search customer or phone..." class="!w-72"
+                        onkeyup="search()">-->
+                    <div class="flex gap-2">
+                        <input type="text" id="search" placeholder="Search Name, Phone, or ID..." class="!w-72"
+                            onkeyup="if(event.key === 'Enter') search()">
+                        <button onclick="search()"
+                            class="bg-yellow-500 text-black px-4 rounded hover:bg-yellow-600 font-bold">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button onclick="fetchData()" class="bg-slate-700 px-4 rounded hover:bg-slate-600">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <!--<button onclick="fetchData()" class="bg-slate-700 px-4 rounded hover:bg-slate-600"><i
+                            class="fas fa-sync-alt"></i></button>-->
+                </div>
+            </div>
+            <div class="card overflow-x-auto p-0 border-none rounded-xl shadow-xl">
+                <table class="w-full text-left" id="masterTable">
+                    <thead>
+                        <tr>
+                            <th>Intake No</th>
+                            <th>Date</th>
+                            <th>Customer Name</th>
+                            <th>Phone | Alternate number</th>
+                            <th>Address</th>
+                            <th>Device</th>
+                            <th>Make</th>
+                            <th>Model</th>
+                            <th>Damages</th>
+                            <th>Issue</th>
+                            <th>Remarks</th>
+                            <th>Issue found</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Amount</th>
+                            <th>Spare | Spare Price</th>
+                            <th>Landing Price</th>
+                            <th>Action</th>
+                            <th>Print</th>
+                            <th>Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dbBody" class="bg-slate-900/50"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="invoice" class="hidden p-10 bg-white text-black"
+        style="width: 800px; margin: auto; font-family: sans-serif;">
+        <div class="flex justify-between border-b-4 border-black pb-4 mb-6">
+            <div>
+                <h1 class="text-4xl font-black">KING OF LAPTOP</h1>
+                <p>Professional Service Center</p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold">TAX INVOICE</p>
+                <p id="i-no"></p>
+                <p id="i-date"></p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 mb-10 text-sm">
+            <div>
+                <p class="font-bold border-b inline-block mb-1 uppercase">Customer Details:</p><br>
+                <b id="cx_name">Customer name: <p id="i-name" class="ml-3"></p></b><br>
+                <b id="cx_ph">
+                    <p id="i-phone"></p>
+                </b><br>
+                <b id="cx_ad">Customer address: <p id="i-addr"></p></b><br>
+            </div>
+            <div class="text-right">
+                <p class="font-bold border-b inline-block mb-1 uppercase">Device Info:</p>
+                <p id="i-device"></p>
+                <p id="i-make"></p>
+                <p id="i-model"></p>
+            </div>
+        </div>
+        <table class="w-full mb-8 border border-black">
+            <tr class="bg-gray-100 font-bold">
+                <td class="border border-black p-2">Repair / Service Description</td>
+                <td class="border border-black p-2">Price (₹)</td>
+                <td class="border border-black p-2 text-right">Total (₹)</td>
+            </tr>
+            <tr>
+                <td class="border border-black p-4 h-48 align-top">
+                    <p class="font-bold">Issue Reported:</p>
+                    <p id="i-issue"></p>
+                    <p class="mt-4 font-bold">Technician Remarks:</p>
+                    <p id="i-rem"></p>
+                </td>
+                <td id="i-amt" class="border border-black p-4 text-right text-3xl font-black align-bottom">₹ 0</td>
+                <td id="i-amt" class="border border-black p-4 text-right text-3xl font-black align-bottom">₹ 0</td>
+            </tr>
+        </table>
+        <div class="flex justify-between items-center mt-10">
+            <div>
+                <p class="text-[10px]">Warranty: 30 days on service parts only.</p>
+            </div>
+            <div class="text-center">
+                <div class="border-t border-black w-40 mb-1"></div>
+                <p class="text-xs">Authorized Signature</p>
+            </div>
+        </div>
+
+
+
+    </div>
+    <div id="intake-receipt" class="hidden p-10 bg-white text-black"
+        style="width: 800px; margin: auto; font-family: sans-serif; border: 1px dashed #000;">
+        <div class="text-center border-b-2 border-black pb-2 mb-4">
+            <h1 class="text-2xl font-black">KING OF LAPTOP SERVICE</h1>
+            <p class="text-sm">ACKNOWLEDGEMENT RECEIPT</p>
+        </div>
+        <div class="flex justify-between mb-4">
+            <div>
+                <p><strong>Intake No:</strong> <span id="r-intake-no"></span></p>
+                <p><strong>Date:</strong> <span id="r-intake-date"></span></p>
+            </div>
+            <div class="text-right">
+                <p><strong>Customer:</strong> <span id="r-intake-cust"></span></p>
+                <p><strong>Contact:</strong> <span id="r-intake-phone"></span></p>
+            </div>
+        </div>
+        <div class="border p-4 mb-4">
+            <p><strong>Device:</strong> <span id="r-intake-dev"></span></p>
+            <p><strong>Issue:</strong> <span id="r-intake-issue"></span></p>
+            <p><strong>Condition/Damages:</strong> <span id="r-intake-damage"></span></p>
+        </div>
+        <div class="text-[10px] italic">
+            <p>* This is a computer-generated job card.</p>
+            <p>* Please produce this receipt at the time of delivery.</p>
+            <p>* Estimate will be provided after complete diagnosis.</p>
+        </div>
+    </div>
+
+    <!---  <div id="invoice" class="hidden p-10 bg-white text-black"
+        style="width: 800px; margin: auto; font-family: sans-serif;">
+        <div class="flex justify-between border-b-4 border-black pb-4 mb-6">
+            <div>
+                <h1 class="text-4xl font-black">KING OF LAPTOP</h1>
+                <p>Professional Service Center</p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold">TAX INVOICE</p>
+                <p id="i-no"></p>
+                <p id="i-date"></p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 mb-10 text-sm">
+            <div>
+                <p class="font-bold border-b inline-block mb-1 uppercase">Customer:</p>
+                <p id="i-name" class="text-lg font-bold"></p>
+                <p id="i-phone"></p>
+                <p id="i-addr"></p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold border-b inline-block mb-1 uppercase">Device Info:</p>
+                <p id="i-device"></p>
+                <p id="i-model"></p>
+            </div>
+        </div>
+        <table class="w-full mb-8 border border-black">
+            <tr class="bg-gray-100 font-bold">
+                <td class="border border-black p-2">Repair / Service Description</td>
+                <td class="border border-black p-2 text-right">Total (₹)</td>
+            </tr>
+            <tr>
+                <td class="border border-black p-4 h-48 align-top">
+                    <p class="font-bold">Issue Reported:</p>
+                    <p id="i-issue"></p>
+                    <p class="mt-4 font-bold">Technician Remarks:</p>
+                    <p id="i-rem"></p>
+                </td>
+                <td id="i-amt" class="border border-black p-4 text-right text-3xl font-black align-bottom">₹ 0</td>
+            </tr>
+        </table>
+        <div class="flex justify-between items-center mt-10">
+            <div>
+                <p class="text-[10px]">Warranty: 30 days on service parts only.</p>
+            </div>
+            <div class="text-center">
+                <div class="border-t border-black w-40 mb-1"></div>
+                <p class="text-xs">Authorized Signature</p>
+            </div>
+        </div>
+    </div> */-->
+
+    <div id="report-template" class="hidden bg-white text-black p-10 font-sans" style="width: 800px; margin: auto;">
+        <div class="text-center border-b-2 border-black pb-4 mb-6">
+            <h1 class="text-3xl font-black">KING OF LAPTOP SERVICE</h1>
+            <p class="text-sm uppercase tracking-widest">Monthly Business Performance Report</p>
+            <h2 id="r-month" class="text-xl font-bold mt-2 text-blue-800"></h2>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="border p-4 text-center">
+                <p class="text-xs uppercase">Total Intake</p>
+                <p id="r-total" class="text-2xl font-bold"></p>
+            </div>
+            <div class="border p-4 text-center">
+                <p class="text-xs uppercase">Delivered</p>
+                <p id="r-del" class="text-2xl font-bold text-green-700"></p>
+            </div>
+            <div class="border p-4 text-center">
+                <p class="text-xs uppercase">Delivery Rate</p>
+                <p id="r-rate" class="text-2xl font-bold"></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mb-10">
+            <div class="bg-gray-100 p-6 rounded">
+                <h3 class="font-bold border-b border-gray-400 mb-3">Financial Summary</h3>
+                <div class="flex justify-between mb-2"><span>Total Revenue:</span><span id="r-rev"
+                        class="font-bold"></span></div>
+
+                <script>
+                    const URL = "https://script.google.com/macros/s/AKfycbzOA6bJ1ICKDzL-lR6IOqE7l5JdcW8tFBYxUkBmmZFJ3H2capWA_i7qr5dSCaIWoGTV9Q/exec"; // Replace this
+                    let raw = [];
+
+                    function showPage(id) {
+                        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+                        document.getElementById('page-' + id).classList.remove('hidden');
+                        if (id === 'db' || id === 'dash') fetchData();
+                    }
+
+                    function resetForm() { document.getElementById('dispNo').innerText = "---"; }
+
+                    /*    document.getElementById('intakeForm').onsubmit = function (e) {
+                            e.preventDefault();
+                            const b = document.getElementById('subBtn');
+                            b.innerText = "UPDATING SHEET..."; b.disabled = true;
+                            fetch(URL, { method: 'POST', body: new FormData(this) }).then(r => r.json()).then(res => {
+                                document.getElementById('dispNo').innerText = res.intakeNo;
+                                alert("Saved! No: " + res.intakeNo);
+                                b.innerText = "REGISTER & SAVE"; b.disabled = false;
+                            });
+                        };  */
+
+
+                    document.getElementById('intakeForm').onsubmit = function (e) {
+                        e.preventDefault();
+                        const b = document.getElementById('subBtn');
+                        const formData = new FormData(this);
+
+                        b.innerText = "REGISTERING..."; b.disabled = true;
+
+                        fetch(URL, { method: 'POST', body: formData })
+                            .then(r => r.json())
+                            .then(res => {
+                                // 1. Update UI with the new Intake Number
+                                document.getElementById('dispNo').innerText = res.intakeNo;
+
+                                // 2. Fill the Intake Receipt Template
+                                document.getElementById('r-intake-no').innerText = "#" + res.intakeNo;
+                                document.getElementById('r-intake-date').innerText = formData.get("Date");
+                                document.getElementById('r-intake-cust').innerText = formData.get("Customer_Name");
+                                document.getElementById('r-intake-phone').innerText = formData.get("Phone_number");
+                                document.getElementById('r-intake-dev').innerText = formData.get("Make") + " " + formData.get("Model");
+                                document.getElementById('r-intake-issue').innerText = formData.get("Issue");
+                                document.getElementById('r-intake-damage').innerText = formData.get("Damages");
+
+                                const receipt = document.getElementById('intake-receipt');
+                                const invoice = document.getElementById('invoice');
+
+                                // Ensure only the receipt has the active class
+                                invoice.classList.remove('print-active');
+                                receipt.classList.add('print-active');
+                                receipt.classList.remove('hidden');
+
+                                setTimeout(() => {
+                                    window.print();
+                                    receipt.classList.add('hidden');
+                                    receipt.classList.remove('print-active');
+                                    b.innerText = "REGISTER & SAVE"; b.disabled = false;
+                                }, 500);
+                                /*   // 3. Print the Receipt
+                                   const receipt = document.getElementById('intake-receipt');
+                                   receipt.classList.remove('hidden');
+   
+                                   setTimeout(() => {
+                                       window.print();
+                                       receipt.classList.add('hidden');
+                                       alert("Registration Successful! Intake No: " + res.intakeNo);
+                                       b.innerText = "REGISTER & SAVE"; b.disabled = false;
+                                       // Optional: Uncomment below to clear form after print
+                                       // document.getElementById('intakeForm').reset();
+                                   }, 500); */
+                            })
+                            .catch(err => {
+                                alert("Error saving data: " + err);
+                                b.disabled = false;
+                            });
+                    };
+
+
+                    function fetchData() {
+                        fetch(URL + "?action=read").then(r => r.json()).then(data => {
+                            raw = data;
+                            render(data);
+                            stats(data);
+                        });
+                    }
+
+                    function stats(data) {
+                        let s = { t: 0, d: 0, p: 0, r: 0, pr: 0 };
+                        if (!data || data.length <= 1) {
+                            resetDashboardStrings();
+                            return;
+                        }
+
+                        data.slice(1).forEach(r => {
+                            s.t++;
+                            if (r[13] === 'Delivered') {
+                                s.d++;
+                                let amt = parseFloat(r[15]) || 0;
+                                let spare = parseFloat(r[16]) || 0;
+                                s.r += amt;
+                                s.pr += (amt - spare); // Profit = Bill Amount - Spare/Landing Price
+                            } else {
+                                s.p++;
+                            }
+                        });
+
+                        document.getElementById('s-total').innerText = s.t;
+                        document.getElementById('s-del').innerText = s.d;
+                        document.getElementById('s-pen').innerText = s.p;
+                        document.getElementById('s-rev').innerText = "₹" + s.r.toLocaleString();
+                        document.getElementById('s-prof').innerText = "₹" + s.pr.toLocaleString();
+                    }
+
+                    function resetDashboardStrings() {
+                        ['s-total', 's-del', 's-pen'].forEach(id => document.getElementById(id).innerText = "0");
+                        ['s-rev', 's-prof'].forEach(id => document.getElementById(id).innerText = "₹0");
+                    }
+                    /* function stats(data) {
+                         let s = { t: 0, d: 0, p: 0, r: 0, pr: 0 };
+                         data.slice(1).forEach(r => {
+                             s.t++;
+                             if (r[13] === 'Delivered') { s.d++; s.r += parseFloat(r[15]); s.pr += parseFloat(r[17]); }
+                             else { s.p++; }
+                         });
+                         document.getElementById('s-total').innerText = s.t;
+                         document.getElementById('s-del').innerText = s.d;
+                         document.getElementById('s-pen').innerText = s.p;
+                         document.getElementById('s-rev').innerText = "₹" + s.r;
+                         document.getElementById('s-prof').innerText = "₹" + s.pr;
+                     }*/
+                    // Add this at the start of your script to set default month to current
+                    window.onload = () => {
+                        const now = new Date();
+                        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                        document.getElementById('dbPeriod').value = `${now.getFullYear()}-${month}`;
+                    };
+
+                    function fetchData() {
+                        const periodValue = document.getElementById('dbPeriod').value; // e.g., "2026-01"
+                        const date = new Date(periodValue);
+                        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        const sheetName = monthNames[date.getMonth()] + "-" + date.getFullYear();
+
+                        // Show loading state
+                        document.getElementById('s-total').innerText = "...";
+
+                        fetch(URL + "?action=read&month=" + sheetName)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.length === 0) {
+                                    alert("No records found for " + sheetName);
+                                    raw = [];
+                                    render([]);
+                                    stats([]);
+                                } else {
+                                    raw = data;
+                                    render(data);
+                                    stats(data);
+                                }
+                            });
+                    }
+
+                    async function fetchYearlySummary() {
+                        const periodValue = document.getElementById('dbPeriod').value;
+                        const year = periodValue.split('-')[0];
+                        const tbody = document.getElementById('yearlyBody');
+
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4">Loading ${year} Report...</td></tr>`;
+
+                        try {
+                            const res = await fetch(`${URL}?action=yearly_summary&year=${year}`);
+                            const summary = await res.json();
+
+                            tbody.innerHTML = "";
+                            if (summary.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4">No data found for ${year}</td></tr>`;
+                                return;
+                            }
+
+                            summary.forEach(item => {
+                                tbody.innerHTML += `
+                                <tr class="border-b border-slate-700">
+                                <td class="p-3 font-bold text-yellow-500">${item.month}</td>
+                                <td class="p-3">${item.total}</td>
+                                <td class="p-3 text-green-400">${item.delivered}</td>
+                                <td class="p-3">₹${item.revenue.toLocaleString()}</td>
+                                <td class="p-3 font-bold text-blue-400">₹${item.profit.toLocaleString()}</td>
+                                </tr>`;
+                            });
+                        } catch (e) {
+                            tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-400">Failed to fetch yearly data.</td></tr>`;
+                        }
+                    }
+
+                    /* async function fetchYearlySummary() {
+                         const periodValue = document.getElementById('dbPeriod').value;
+                         const year = periodValue.split('-')[0]; // Extract "2026" from "2026-01"
+                         const tbody = document.getElementById('yearlyBody');
+             
+                         tbody.innerHTML = `<tr><td colspan="5" class="text-center p-10 text-slate-500">Calculating yearly data...</td></tr>`;
+             
+                         try {
+                             const response = await fetch(`${URL}?action=yearly_summary&year=${year}`);
+                             const summary = await response.json();
+             
+                             tbody.innerHTML = "";
+                             summary.forEach(item => {
+                                 const tr = document.createElement('tr');
+                                 tr.className = "hover:bg-slate-800/50 transition";
+                                 tr.innerHTML = `
+                             <td class="p-3 font-bold text-yellow-500">${item.month}</td>
+                             <td class="p-3">${item.total}</td>
+                             <td class="p-3 text-green-400">${item.delivered}</td>
+                             <td class="p-3">₹${item.revenue.toLocaleString()}</td>
+                             <td class="p-3 font-bold text-blue-400">₹${item.profit.toLocaleString()}</td>
+                         `;
+                                 tbody.appendChild(tr);
+                             });
+                         } catch (e) {
+                             tbody.innerHTML = `<tr><td colspan="5" class="text-center p-5 text-red-400">Error loading summary.</td></tr>`;
+                         }
+                     } */
+                    /*  function render(data) {
+                          const b = document.getElementById('dbBody'); b.innerHTML = "";
+                          data.slice(1).reverse().forEach(r => {
+                              const tr = document.createElement('tr');
+                              tr.innerHTML = `
+                                  <td><span class="text-yellow-500 font-bold">${r[1]}</span><br></td>
+                                  <td><span class="text-[10px] text-slate-500">${new Date(r[0]).toLocaleDateString()}</span></td>
+                                  <td><b>${r[2]}</b><br></td
+                                  <td><span class="text-[11px] text-slate-400">${r[3]} | ${r[4]}</span></td>
+                                  <td><b>${r[5]}</b><br></td>
+                                  <td><b>${r[6]}</b><br></td>
+                                  <td><span class="text-blue-400 font-bold text-xs uppercase">${r[7]}</td>
+                                  <td><b>${r[8]}</b><br></td>
+                                  <td><b>${r[9]}</b><br></td>
+                                  <td><b>${r[10]}</b><br></td>
+                                  <td><b>${r[11]}</b><br></td>
+                                  <td>
+                                      <input type="text" id="sf_${r[1]}" value="${r[12]}" class="w-auto h-7 mb-1" placeholder="Solutions">
+                                  </td>
+                                  <td>
+                                      <select id="st_${r[1]}" class="text-[11px] w-auto h-7 mb-1">
+                                          ${["New", "Waiting for approval", "Pending", "Ready", "Delivered", "Return", "Cancel"].map(s => `<option ${r[13] == s ? 'selected' : ''}>${s}</option>`).join('')}
+                                      </select>
+                                      
+                                  </td>
+                                  <td>
+                                      <select id="py_${r[1]}" class="text-[11px] w-auto h-7">
+                                          <option ${r[14] == 'Paid' ? 'selected' : ''}>Paid</option><option ${r[14] == 'Not Paid' ? 'selected' : ''}>Not Paid</option>
+                                      </select>
+                                  </td>
+                                  <td>
+                                      <input type="number" id="am_${r[1]}" value="${r[15]}" class="w-auto h-7" placeholder="Bill">
+                                  </td>
+                                  <td>
+                                      <input type="number" id="sp_${r[1]}" value="${r[16]}" class="w-auto h-7 mb-1" placeholder="Spare">
+                                  </td>
+                                  <td>
+                                      <button onclick="save('${r[1]}')" class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-[10px] font-bold h-7 w-auto">UPDATE</button>
+                                  </td>
+                                      ${r[13] == 'Delivered' ? `<button onclick="printInv('${r[1]}')" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-[10px] font-bold mt-3 h-7 w-auto"><i class="fas fa-print"></i></button>` : ''}
+                                  <td>
+                              `;
+                              b.appendChild(tr);
+                          });
+                      }
+              */
+
+                    /*   function save(id) {
+                           const f = new FormData();
+                           f.append("action", "update");
+                           f.append("Intake_No", id);
+                           f.append("Issue_found", document.getElementById('sf_' + id).value);
+                           f.append("Status", document.getElementById('st_' + id).value);
+                           f.append("Payment", document.getElementById('py_' + id).value);
+                           f.append("Amount", document.getElementById('am_' + id).value);
+                           f.append("Spare_Name", document.getElementById('sn_' + id).value);
+                           f.append("Landing_Price", document.getElementById('lp_' + id).value);
+                           f.append("Spare_Price", document.getElementById('sp_' + id).value);
+   
+                           fetch(URL, { method: 'POST', body: f })
+                               .then(r => r.text())
+                               .then(() => {
+                                   alert("Updated!");
+                                   fetchData();
+                               });
+                       }*/
+
+
+                    /*   function save(id) {
+                           const f = new FormData();
+                           f.append("action", "update"); // Crucial for the script to know this is an update
+                           f.append("Intake_No", id);
+                           f.append("Issue_found", document.getElementById('sf_' + id).value);
+                           f.append("Status", document.getElementById('st_' + id).value);
+                           f.append("Payment", document.getElementById('py_' + id).value);
+                           f.append("Amount", document.getElementById('am_' + id).value);
+                           f.append("Spare", document.getElementById('sp_' + id).value);
+   
+                           // Visual feedback
+                           const btn = event.target;
+                           const originalText = btn.innerText;
+                           btn.innerText = "WAIT...";
+   
+                           fetch(URL, { method: 'POST', body: f })
+                               .then(r => r.text())
+                               .then(() => {
+                                   alert("Record " + id + " Updated Successfully!");
+                                   btn.innerText = originalText;
+                                   fetchData();
+                               })
+                               .catch(err => alert("Error: " + err));
+                       }*/
+                    /* function save(id) {
+                    const f = new FormData();
+                    f.append("action", "update");
+                    f.append("Intake_No", id);
+                    f.append("Issue_found", document.getElementById('sf_' + id).value);
+                    f.append("Status", document.getElementById('st_' + id).value);
+                    f.append("Payment", document.getElementById('py_' + id).value);
+                    f.append("Spare", document.getElementById('sp_' + id).value);
+                    f.append("Amount", document.getElementById('am_' + id).value);
+                    fetch(URL, { method: 'POST', body: f }).then(() => { alert("Updated!"); fetchData(); });
+                    }
+                    */
+
+                    function printInv(id) {
+                        const r = raw.find(x => x[1] == id);
+                        if (!r) return;
+
+                        // Standard invoice data mapping
+                        document.getElementById('i-no').innerText = "Inv No: #" + r[1];
+                        document.getElementById('i-name').innerText = r[2];
+                        document.getElementById('i-amt').innerText = "₹ " + (r[15] || 0);
+
+                        // Add the specific spare details to the repair description area
+                        const spareDetails = `\nSpare Used: ${r[16] || 'N/A'} (₹${r[18] || 0})`;
+                        document.getElementById('i-rem').innerText = (r[12] || "") + spareDetails;
+
+                        const invoice = document.getElementById('invoice');
+                        invoice.classList.add('print-active');
+                        invoice.classList.remove('hidden');
+
+                        setTimeout(() => {
+                            window.print();
+                            invoice.classList.add('hidden');
+                            invoice.classList.remove('print-active');
+                        }, 500);
+                    }
+
+                    /*  function printInv(id) {
+                          const r = raw.find(x => x[1] == id);
+                          if (!r) return;
+  
+                          const receipt = document.getElementById('intake-receipt');
+                          const invoice = document.getElementById('invoice');
+  
+                          // Set up data
+                          document.getElementById('i-no').innerText = "Invoice No: " + r[1];
+                          document.getElementById('i-date').innerText = "Date: " + new Date().toLocaleDateString();
+                          document.getElementById('i-name').innerText = r[2];
+                          document.getElementById('i-phone').innerText = "Phone: " + r[3];
+                          document.getElementById('i-addr').innerText = r[5];
+                          document.getElementById('i-device').innerText = "Device: " + r[6];
+                          document.getElementById('i-make').innerText = "Make: " + r[7];
+                          document.getElementById('i-model').innerText = "Model: " + r[8];
+                          document.getElementById('i-issue').innerText = r[10];
+                          document.getElementById('i-rem').innerText = r[12];
+                          document.getElementById('i-amt').innerText = "₹ " + (r[15] || 0);
+  
+                          // ... rest of your data mapping ...
+  
+                          // Ensure only the invoice has the active class
+                          receipt.classList.remove('print-active');
+                          invoice.classList.add('print-active');
+                          invoice.classList.remove('hidden');
+  
+                          setTimeout(() => {
+                              window.print();
+                              invoice.classList.add('hidden');
+                              invoice.classList.remove('print-active');
+                          }, 500);
+                      }*/
+                    /* function printInv(id) {
+                         const r = raw.find(x => x[1] == id);
+                         document.getElementById('i-no').innerText = "Inv No: #" + r[1];
+                         document.getElementById('i-date').innerText = "Date: " + new Date().toLocaleDateString();
+                         document.getElementById('i-name').innerText = r[2];
+                         document.getElementById('i-phone').innerText = "Ph: " + r[3];
+                         document.getElementById('i-addr').innerText = r[5];
+                         document.getElementById('i-device').innerText = r[6] + " " + r[7];
+                         document.getElementById('i-model').innerText = "Model: " + r[8];
+                         document.getElementById('i-issue').innerText = r[10];
+                         document.getElementById('i-rem').innerText = r[11];
+                         document.getElementById('i-amt').innerText = "₹ " + r[14];
+                         window.print();
+                     }*/
+                    /*   function printInv(id) {
+                           const r = raw.find(x => x[1] == id);
+                           if (!r) return;
+   
+                           // Fill data
+                           document.getElementById('i-no').innerText = "Inv No: #" + r[1];
+                           document.getElementById('i-date').innerText = "Date: " + new Date().toLocaleDateString();
+                           document.getElementById('i-name').innerText = r[2];
+                           document.getElementById('i-phone').innerText = "Ph: " + r[3];
+                           document.getElementById('i-addr').innerText = r[5];
+                           document.getElementById('i-device').innerText = r[6] + " " + r[7];
+                           document.getElementById('i-model').innerText = "Model: " + r[8];
+                           document.getElementById('i-issue').innerText = r[10];
+                           document.getElementById('i-rem').innerText = r[11];
+                           document.getElementById('i-amt').innerText = "₹ " + (r[15] || 0);
+   
+                           // Show the hidden div so the browser can "see" it to print
+                           const inv = document.getElementById('invoice');
+                           inv.classList.remove('hidden');
+   
+                           // Small timeout to ensure the UI updates before the print dialog freezes the tab
+                           setTimeout(() => {
+                               window.print();
+                               inv.classList.add('hidden'); // Re-hide after printing
+                           }, 100);
+                       } */
+
+                    /*    function printInv(id) {
+                            const r = raw.find(x => x[1] == id);
+                            if (!r) return;
+    
+                            // Mapping the data correctly based on your sheet structure
+                            document.getElementById('i-no').innerText = "Inv No: #" + r[1];
+                            document.getElementById('i-date').innerText = "Date: " + new Date().toLocaleDateString();
+                            document.getElementById('i-name').innerText = r[2];
+                            document.getElementById('i-phone').innerText = "Ph: " + r[3];
+                            document.getElementById('i-addr').innerText = r[5];
+                            document.getElementById('i-device').innerText = r[6] + " " + r[7];
+                            document.getElementById('i-model').innerText = "Model: " + r[8];
+                            document.getElementById('i-issue').innerText = r[10];
+                            document.getElementById('i-rem').innerText = r[11];
+    
+                            // index 15 is the "Amount/Bill" column in your sheet
+                            document.getElementById('i-amt').innerText = "₹ " + (r[15] || 0);
+    
+                            // Show the invoice, print it, then hide it again
+                            const invElement = document.getElementById('invoice');
+                            invElement.classList.remove('hidden');
+                            window.print();
+                            invElement.classList.add('hidden');
+                        } */
+                    function render(data) {
+                        const b = document.getElementById('dbBody');
+                        b.innerHTML = "";
+
+                        // We check if we are rendering the full 'raw' array (which has headers)
+                        // or a filtered result (which might not)
+                        const itemsToRender = (data[0] && isNaN(data[0][1])) ? data.slice(1) : data;
+
+                        itemsToRender.reverse().forEach(r => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td><span class="text-yellow-500 font-bold">${r[1]}</span></td>
+                                <td><span class="text-[10px] text-slate-500">${new Date(r[0]).toLocaleDateString()}</span></td>
+                                <td><b>${r[2]}</b></td>
+                                <td><span class="text-[11px] text-slate-400">${r[3]} | ${r[4]}</span></td>
+                                <td>${r[5]}</td>
+                                <td>${r[6]}</td>
+                                <td><span class="text-blue-400 font-bold text-xs uppercase">${r[7]}</span></td>
+                                <td>${r[8]}</td>
+                                <td>${r[9]}</td>
+                                <td>${r[10]}</td>
+                                <td>${r[11]}</td>
+                                <td><input type="text" id="sf_${r[1]}" value="${r[12] || ''}" class="w-auto h-7 mb-1" placeholder="Solutions"></td>
+                                <td>
+                                    <select id="st_${r[1]}" class="text-[11px] w-auto h-7 mb-1">
+                                        ${["New", "Waiting for approval", "Pending", "Ready", "Delivered", "Return", "Cancel"].map(s => `<option
+                                        ${r[13] == s ? 'selected' : ''}>${s}</option>`).join('')}
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="py_${r[1]}" class="text-[11px] w-auto h-7">
+                                        <option ${r[14] == 'Paid' ? 'selected' : ''}>Paid</option>
+                                        <option ${r[14] == 'Not Paid' ? 'selected' : ''}>Not Paid</option>
+                                    </select>
+                                </td>
+                                <td><input type="number" id="am_${r[1]}" value="${r[15] || 0}" class="w-auto h-7" placeholder="Bill"></td>
+                            
+                               
+                                <td>
+    <div id="spare_container_${r[1]}">
+        <div class="spare-row">
+            <input type="text" value="${r[16]}" class="sn-field" placeholder="Spare Name" style="width: 80px;">
+            <input type="number" value="${r[17]}" class="sp-field" placeholder="Price" style="width: 60px;">
+            <button onclick="addNewSpareRow('${r[1]}')" class="text-yellow-500"><i class="fas fa-plus-circle"></i></button>
+        </div>
+    </div>
+</td>
+<td>
+    <input type="number" id="lp_${r[1]}" value="${r[18] || 0}" class="w-20 h-7" placeholder="Landing">
+</td>
+<td>
+    <button onclick="save('${r[1]}')" class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-[10px] font-bold">UPDATE</button>
+</td>
+<td>
+    ${r[13] == 'Delivered' ? `<button onclick="printInv('${r[1]}')" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-[10px] h-7"><i class="fas fa-print"></i></button>` : ''}
+</td>
+<td>
+    <span id="profit_display_${r[19]}" class="text-green-400 font-bold">₹0</span>
+</td>
+
+
+                            `;
+                            b.appendChild(tr);
+                        });
+                    }
+
+                    function search() {
+                        const q = document.getElementById('search').value.toLowerCase().trim();
+                        if (!q) {
+                            render(raw); // If search is empty, show everything
+                            return;
+                        }
+
+                        // Filter data excluding the header row
+                        const filtered = raw.slice(1).filter(r => {
+                            return (
+                                r[1].toString().toLowerCase().includes(q) || // Intake No
+                                r[2].toString().toLowerCase().includes(q) || // Name
+                                r[3].toString().toLowerCase().includes(q) // Phone
+                            );
+                        });
+
+                        render(filtered);
+                    }
+
+                    function addSpareRow(id) {
+                        const item = prompt("Enter Spare Part Name:");
+                        if (!item) return;
+                        const price = prompt("Enter Price for " + item + ":");
+                        if (isNaN(price) || price === null) return;
+
+                        const hiddenInput = document.getElementById('sp_' + id);
+                        let currentData = hiddenInput.value ? JSON.parse(hiddenInput.value) : [];
+
+                        currentData.push({ name: item, price: parseFloat(price) });
+                        hiddenInput.value = JSON.stringify(currentData);
+
+                        // Refresh the visual list
+                        document.getElementById('spare_list_' + id).innerHTML = renderSpareItems(hiddenInput.value, id);
+                        calculateInstantProfit(id);
+                    }
+
+                    function renderSpareItems(jsonStr, id) {
+                        if (!jsonStr || jsonStr == "0") return "No spares";
+                        try {
+                            const data = JSON.parse(jsonStr);
+                            return data.map(s => `<div class="flex justify-between border-b border-slate-700"><span>${s.name}</span><span>₹${s.price}</span></div>`).join('');
+                        } catch (e) {
+                            return jsonStr; // Fallback for old data
+                        }
+                    }
+
+                    function calculateInstantProfit(id) {
+                        const bill = parseFloat(document.getElementById('am_' + id).value) || 0;
+                        const spareJson = document.getElementById('sp_' + id).value;
+                        let totalSpareCost = 0;
+
+                        try {
+                            const spares = JSON.parse(spareJson);
+                            totalSpareCost = spares.reduce((sum, item) => sum + item.price, 0);
+                        } catch (e) { totalSpareCost = parseFloat(spareJson) || 0; }
+
+                        document.getElementById('pf_display_' + id).innerText = "₹" + (bill - totalSpareCost);
+                    }
+
+                    /* function search() {
+                    const q = document.getElementById('search').value.toLowerCase();
+                    const f = raw.filter((x, i) => i === 0 || x[2].toLowerCase().includes(q) || x[3].includes(q) ||
+                    x[1].toString().includes(q));
+                    render(f);
+                    } */
+
+                    function addNewSpareRow(id) {
+                        const container = document.getElementById(`spare_container_${id}`);
+                        const row = document.createElement('div');
+                        row.className = 'spare-row';
+                        row.innerHTML = `
+        <input type="text" class="sn-field" placeholder="Spare Name" style="width: 80px;">
+        <input type="number" class="sp-field" placeholder="Price" style="width: 60px;">
+        <button onclick="this.parentElement.remove()" class="text-red-500"><i class="fas fa-minus-circle"></i></button>
+    `;
+                        container.appendChild(row);
+                    }
+
+                    function save(id) {
+                        const container = document.getElementById(`spare_container_${id}`);
+                        const names = Array.from(container.querySelectorAll('.sn-field')).map(i => i.value).filter(v => v !== "");
+                        const prices = Array.from(container.querySelectorAll('.sp-field')).map(i => i.value).filter(v => v !== "");
+
+                        const f = new FormData();
+                        f.append("action", "update");
+                        f.append("Intake_No", id);
+                        f.append("Issue_found", document.getElementById('sf_' + id).value);
+                        f.append("Status", document.getElementById('st_' + id).value);
+                        f.append("Payment", document.getElementById('py_' + id).value);
+                        f.append("Amount", document.getElementById('am_' + id).value);
+                        f.append("Landing_Price", document.getElementById('lp_' + id).value);
+
+                        // Join multiple spares with commas to store in one cell
+                        f.append("Spare_Names", names.join(", "));
+                        f.append("Spare_Prices", prices.join(", "));
+
+                        fetch(URL, { method: 'POST', body: f })
+                            .then(r => r.text())
+                            .then(() => {
+                                alert("Record " + id + " Updated!");
+                                fetchData();
+                            });
+                    }
+                </script>
+</body>
+
+</html>
